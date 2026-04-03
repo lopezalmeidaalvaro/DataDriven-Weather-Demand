@@ -115,6 +115,8 @@ Contrary to industry "gut feelings," the data demonstrates that booking behavior
 | **P-Value** | `< 0.05` | Statistically significant | **High Confidence:** Actionable data. |
 | **Elasticity** | **Inelastic** | Customers ignore the dust | **Avoid Reactive Discounting.** |
 
+**Scientific Post-Mortem:** Although $r = 0.2678$ suggests a weak positive link, the $p\text{-value}$ of $0.40$ indicates that the null hypothesis cannot be rejected with the current sample size. This confirms that Revenue Managers should prioritize booking pace over meteorological alerts, as weather impact is statistically negligible compared to seasonal trends.
+
 > [!IMPORTANT]
 > **Engineering Verdict:** Calima is a "visual noise" phenomenon, not a real demand detractor. Hotels executing *Price Dumping* during Saharan dust alerts are unnecessarily eroding their operating margins (~ADR) without gaining significant occupancy volume.
 
