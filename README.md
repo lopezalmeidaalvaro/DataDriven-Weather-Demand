@@ -185,5 +185,6 @@ To scale this proof-of-concept into an enterprise-grade product:
 ---
 
 👨‍💻 Architected & Developed by Álvaro López Almeida
+
 Capstone Project — Data Engineering & Revenue Analytics
 
