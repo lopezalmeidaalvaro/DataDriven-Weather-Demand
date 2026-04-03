@@ -32,9 +32,34 @@ The project relies on a programmatic **Extract-Transform-Load (ETL)** pipeline d
 * **Resilient Aggregation:** Implemented robust counting strategies (`.size()` vs `.count()`) to mitigate **Schema Drift**. This prevented critical pipeline failures caused by inconsistently reported questionnaire IDs (Nulls) across different quarters.
 * **Relational Merging:** Conducted a Left Join unifying disparate datasets via a shared temporal dimension (`Month/OLA`).
 
+```mermaid
+graph TD
+    A[AEMET API] -->|Daily Extraction| B(Python ETL Script)
+    C[ISTAC Microdata] -->|CSV Batch Ingestion| B
+    B --> D{Data Validation?}
+    D -->|Passed| E[Data Cleaning & Harmonization]
+    D -->|Failed| F[Error Handling & Logging]
+    E --> G[Dynamic Anomaly Detection]
+    G --> H[Final Result: Pearson Correlation]
+```
+
 ---
 
-## 🧠 3. Advanced Feature Engineering: Dynamic Anomaly Detection
+## 🛡️ 3. Data Quality & Reliability (Data Contracts)
+
+Statistical models are only as good as the data feeding them (**Garbage In, Garbage Out**). To ensure the integrity of the Pearson correlation ($r$), the pipeline implements a multi-layered **Data Quality Gate** before any analytical processing occurs:
+
+* **Schema Enforcement & Drift Protection:** The system validates the presence of mandatory dimensions (`tmax`, `fecha`, `hrMin`) and metrics. This acts as a contract, ensuring that if the AEMET API or ISTAC microdata structure changes, the pipeline fails loudly with a descriptive error instead of producing silent, corrupted results.
+* **Physical Domain Constraints:** We apply meteorological logic specific to the Canary Islands' subtropical climate. 
+    * $T_{max}$ must reside within the [-5°C, 55°C] range.
+    * Relative Humidity ($RH$) is strictly validated within the [0, 100] range.
+    * Records outside these bounds are flagged as sensor malfunctions and sanitized to prevent outlier bias.
+* **Reliability Thresholding (Null Handling):** The pipeline monitors the "Signal-to-Noise" ratio. If the temporal series identifies more than 10% of missing values (**Critical Nulls**), the execution halts. This prevents the Monthly Average from being skewed by incomplete time windows.
+* **Idempotent Extraction:** The `extract_aemet_api.py` script is designed for idempotency. It verifies the local state of the `data/raw/` directory before initiating network requests, protecting API quotas and ensuring the pipeline is safely re-runnable in any environment.
+
+---
+
+## 🧠 4. Advanced Feature Engineering: Dynamic Anomaly Detection
 A static temperature threshold (e.g., $T > 27.5^\circ C$) is statistically unreliable in subtropical climates due to heavy **seasonality bias** (yielding 100% false positives during August).
 
 To isolate *true* Saharan Dust intrusions, I engineered a **Dynamic Thresholding Algorithm**. A day $i$ in month $m$ is flagged as a Calima Anomaly ($C_i$) if and only if it exceeds the historical rolling average of its specific month, combined with a severe drop in humidity:
@@ -49,7 +74,7 @@ $$
 
 ---
 
-## 🧮 4. Statistical Modeling & Results
+## 🧮 5. Statistical Modeling & Results
 We evaluated the relationship between Calima Days ($X$) and the Last-Minute Booking Ratio ($Y$) using the **Pearson Correlation Coefficient**:
 
 $$
@@ -68,47 +93,55 @@ $$
 
 ---
 
-## 📂 5. Repository Structure 
+## 📂 6. Repository Structure 
 
 ```text
 DataDriven-Weather-Demand/
+├── .venv/                          # Auto-generated isolated virtual environment
 ├── data/
-│   └── raw/                              # Place your ISTAC & AEMET CSV files here
+│   └── raw/                        # Source CSVs (ISTAC & AEMET)
 ├── docs/
-│   ├── executive_summary.md              # Business-facing insights
-│   ├── personal_study_notes.md           # Personal study guide
-│   └── technical_annex.md                # Mathematical proofs & methodology
+│   ├── executive_summary.md        # Business-facing insights
+│   ├── personal_study_notes.md     # Personal study guide
+│   └── technical_annex.md          # Mathematical proofs & methodology
 ├── scripts/
-│   ├── etl_pipeline_analytics.py         # Main ETL logic & correlation engine
-│   └── extract_aemet_api.py              # API connection & data fetching batch script
-├── .env.example                          # Environment variables template
-├── .gitignore                            # Python caches & sensitive keys
-├── requirements.txt                      # Pinned dependency tree
-└── README.md                             # Project documentation
+│   ├── etl_pipeline_analytics.py   # Main ETL logic with Data Quality Gates
+│   └── extract_aemet_api.py        # Idempotent API extraction script
+├── .env.example                    # Template for API credentials
+├── .gitignore                      # Ensures .venv and secrets are not tracked
+├── .python-version                 # Defines exact Python interpreter (3.12+)
+├── pyproject.toml                  # Project metadata & dependency definitions
+├── uv.lock                         # Deterministic lockfile for 100% reproducibility
+└── README.md                       # Core project documentation
 ```
 
 ---
 
-## 🚀 6. Reproducibility & Installation
-The pipeline is fully reproducible. To run the analysis on your local machine:
+## 🚀 7. Reproducibility & Installation
+This project uses **`uv`** (the next-generation Python package manager) to ensure 100% reproducible execution environments. By leveraging a `uv.lock` file, we eliminate "dependency hell" and guarantee that the pipeline runs identically across any machine or OS.
+
+### Installation & Execution
+
 1. **Clone the repository:**
- ```Bash
-git clone [https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git](https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git)
-cd DataDriven-Weather-Demand
-```
-2.   **Install dependencies:**
-```Bash
-pip install -r requirements.txt
-```
-3. **Execute the ETL Pipeline:**
-```Bash
-python scripts/etl_pipeline_analytics.py
-```
-* **Note:** Ensure your AEMET API Key is safely stored as an environment variable (or within a .env file) before executing to allow the script to authenticate correctly.
+   ```bash
+   git clone [https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git](https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git)
+   cd DataDriven-Weather-Demand
+   ```
+2. **Sync the Environment:**
+If you have uv installed, simply run:
+ ```bash
+  uv sync
+   ```
+This command automatically creates a virtual environment (.venv) and installs the exact versions of all dependencies (Pandas, Requests, etc.) in milliseconds.
+3. **Run the Data Pipeline:**
+ ```bash
+  uv run scripts/etl_pipeline_analytics.py
+   ```
+Engineering Note: For legacy environments, a standard requirements.txt can be generated using uv export --format requirements-txt > requirements.txt, although using the native uv.lock is the recommended professional standard for deterministic builds.
 
 ---
 
-## 🔮 7. Future Scalability (Next Steps)
+## 🔮 8. Future Scalability (Next Steps)
 To scale this proof-of-concept into an enterprise-grade product:
 * **Cloud Orchestration:** Migrate the Python scripts to Apache Airflow (or AWS Step Functions) for automated daily runs and monitoring.
 * **Machine Learning:** Integrate flight pricing data (AENA) to train a Random Forest regressor, predicting last-minute demand volume accurately by combining weather anomalies and connectivity factors.
