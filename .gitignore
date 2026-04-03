@@ -12,3 +12,7 @@ env/
 *.csv
 *.pdf
 !data/sample_istac_microdata.csv
+
+# Logs
+*.log
+pipeline_execution.log
