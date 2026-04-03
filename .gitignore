@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos de datos muy pesados (¡CRÍTICO para no saturar GitHub!)
+*.csv
+*.pdf
+!data/sample_istac_microdata.csv
