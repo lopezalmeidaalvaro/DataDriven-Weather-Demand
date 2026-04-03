@@ -68,7 +68,7 @@ $$
 
 ---
 
-## 📂 5. Repository Structure
+## 📂 5. Repository Structure 
 
 ```text
 DataDriven-Weather-Demand/
@@ -85,5 +85,35 @@ DataDriven-Weather-Demand/
 ├── .gitignore                            # Python caches & sensitive keys
 ├── requirements.txt                      # Pinned dependency tree
 └── README.md                             # Project documentation
+```
 
-## 📂 5. Repository Structure
+---
+
+## 🚀 6. Reproducibility & Installation
+The pipeline is fully reproducible. To run the analysis on your local machine:
+1. **Clone the repository:**
+ ```Bash
+git clone [https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git](https://github.com/lopezalmeidaalvaro/DataDriven-Weather-Demand.git)
+cd DataDriven-Weather-Demand
+```
+2.   **Install dependencies:**
+```Bash
+pip install -r requirements.txt
+```
+3. **Execute the ETL Pipeline:**
+```Bash
+python scripts/etl_pipeline_analytics.py
+```
+* **Note:** Ensure your AEMET API Key is safely stored as an environment variable (or within a .env file) before executing to allow the script to authenticate correctly.
+
+---
+
+## 🔮 7. Future Scalability (Next Steps)
+To scale this proof-of-concept into an enterprise-grade product:
+* **Cloud Orchestration:** Migrate the Python scripts to Apache Airflow (or AWS Step Functions) for automated daily runs and monitoring.
+* **Machine Learning:** Integrate flight pricing data (AENA) to train a Random Forest regressor, predicting last-minute demand volume accurately by combining weather anomalies and connectivity factors.
+
+---
+
+👨‍💻 Architected & Developed by Álvaro López Almeida
+Capstone Project — Data Engineering & Revenue Analytics
