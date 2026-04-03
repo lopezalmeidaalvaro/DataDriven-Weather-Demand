@@ -121,7 +121,7 @@ Contrary to industry "gut feelings," the data demonstrates that booking behavior
 | Metric | Result | Interpretation | Revenue Action |
 | :--- | :--- | :--- | :--- |
 | **Pearson (r)** | `0.268` | Weak positive correlation | **Hold ADR:** Do not drop prices. |
-| **P-Value** | `< 0.05` | Statistically significant | **High Confidence:** Actionable data. |
+| **P-Value** | `0.40` | Not statistically significant | **Avoid False Alarms:** Ignore weather alerts. |
 | **Elasticity** | **Inelastic** | Customers ignore the dust | **Avoid Reactive Discounting.** |
 
 **Scientific Post-Mortem:** Although $r = 0.2678$ suggests a weak positive link, the $p\text{-value}$ of $0.40$ indicates that the null hypothesis cannot be rejected with the current sample size. This confirms that Revenue Managers should prioritize booking pace over meteorological alerts, as weather impact is statistically negligible compared to seasonal trends.
@@ -172,15 +172,15 @@ This project uses **`uv`** (the next-generation Python package manager) to ensur
 If you have uv installed, simply run:
 
  ```bash
-  uv sync
-   ```
+ uv sync
+ ```
 
 This command automatically creates a virtual environment (.venv) and installs the exact versions of all dependencies (Pandas, Requests, etc.) in milliseconds.
 3. **Run the Data Pipeline:**
 
  ```bash
-  uv run scripts/etl_pipeline_analytics.py
-   ```
+ uv run scripts/etl_pipeline_analytics.py
+ ```
 
 Engineering Note: For legacy environments, a standard requirements.txt can be generated using uv export --format requirements-txt > requirements.txt, although using the native uv.lock is the recommended professional standard for deterministic builds.
 
